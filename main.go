@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/yeqown/go-qrcode"
 )
@@ -34,15 +35,25 @@ func main() {
 		panic(err)
 	}
 
-	for _, invitationCode := range lines {
-		qrc, err := qrcode.New(invitationCode)
-		if err != nil {
-			fmt.Printf("could not generate QRCode: %v", err)
-		}
+	linesLength := len(lines)
 
-		// save file
-		if err := qrc.Save(fmt.Sprintf("out/%s.png", invitationCode)); err != nil {
-			fmt.Printf("could not save image: %v", err)
-		}
+	var wg sync.WaitGroup
+	wg.Add(linesLength)
+
+	for i := 0; i < linesLength; i++ {
+		go func(i int) {
+			defer wg.Done()
+			fmt.Printf("Generating QR with value: %s\n", lines[i])
+			qrc, err := qrcode.New(lines[i])
+			if err != nil {
+				fmt.Printf("could not generate QRCode: %v", err)
+			}
+
+			// save file
+			if err := qrc.Save(fmt.Sprintf("out/%s.png", lines[i])); err != nil {
+				fmt.Printf("could not save image: %v", err)
+			}
+		}(i)
 	}
+	wg.Wait()
 }
