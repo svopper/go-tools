@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -23,7 +25,7 @@ func DownloadFile(filepath string, url string) error {
 	defer resp.Body.Close()
 
 	// Create the file
-	out, err := os.Create(filepath)
+	out, err := os.Create(fmt.Sprintf("out/%s", filepath))
 	if err != nil {
 		return err
 	}
@@ -55,7 +57,9 @@ func main() {
 	for i := 0; i < linesLength; i++ {
 		go func(i int) {
 			defer wg.Done()
-			err := DownloadFile("logo.svg", lines[i])
+			fromIndex := strings.LastIndex(lines[i], "/")
+			filename := string(lines[i][fromIndex+1:])
+			err := DownloadFile(filename, lines[i])
 			if err != nil {
 				panic(err)
 			}
