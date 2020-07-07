@@ -21,3 +21,7 @@ func GetLicense() interface{} {
    return nil
 }
 ```
+
+<p align="center">
+  <img src=".assets/network-side.svg" />
+</p>
